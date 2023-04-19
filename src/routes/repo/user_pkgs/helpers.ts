@@ -23,8 +23,6 @@ export function pkgTypeCondition(pkg: RequiredDecodedPackageJson): { pkg_type: T
     return { pkg_type: "Others", condition: false }
 }
 
-
-
 //  modify package.json to addthe pkg_type 
 export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
 
@@ -64,7 +62,6 @@ export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
     }
     return pgkjson
 }
-
 
 //  get repository package.json
 export async function getRepoPackageJson(owner_repo: string) {

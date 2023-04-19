@@ -18,7 +18,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseReposMiddleware = exports.fetchAllRepos = void 0;
 const helpers_1 = require("./helpers");
-const helpers_2 = require("../../utils/user_pkgs/helpers");
+const helpers_2 = require("./user_pkgs/helpers");
 function fetchAllRepos(req, res, next) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {

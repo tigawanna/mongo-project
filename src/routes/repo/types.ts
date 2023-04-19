@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { DecodedPackageJson, ViewerRepos } from "../../utils/user_pkgs/types";
+import { DecodedPackageJson, ViewerRepos } from "./user_pkgs/types";
 
 export interface IPkgRepo{
     id: string;

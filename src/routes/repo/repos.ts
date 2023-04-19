@@ -1,5 +1,5 @@
 import express from "express";
-import { getViewerRepos } from "../../utils/user_pkgs/packages";
+import { getViewerRepos } from "./user_pkgs/packages";
 import { fetchAllRepos, parseReposMiddleware } from "./handlers";
 import { PkgsRequest } from "./types";
 
