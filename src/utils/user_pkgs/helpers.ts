@@ -43,11 +43,22 @@ export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
                 return dep === key
             })
         })
-        pgkjson['favdeps'] = favdeps
 
-        // pgkjson['alldeps'] = alldeps
-        // console.log("parsed pkgjson >>>>>>>>>>>>  ", pgkjson)
-        // console.log("parsed favdeps >>>>>>>>>>>>  ", favdeps)
+        // if(favdeps.length<15){
+        //   const favDepsSet = new Set(favdeps)
+        //     alldeps.map((dep) => {
+        //     if(favDepsSet.size <= 20){
+        //         //@ts-expect-error
+        //         favDepsSet.add(dep)
+        //     }
+        //     return
+        // })
+        // pgkjson['favdeps'] = Array.from(favDepsSet)
+        // return pgkjson
+        // }
+
+
+        pgkjson['favdeps'] = favdeps
         return pgkjson
 
     }
@@ -59,7 +70,6 @@ export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
 export async function getRepoPackageJson(owner_repo: string) {
     try {
         const headersList = {
-       
             "Authorization": `bearer ${process.env.GH_PAT}`,
         }
         const response = await fetch(`https://api.github.com/repos/${owner_repo}/contents/package.json`, {
@@ -69,16 +79,11 @@ export async function getRepoPackageJson(owner_repo: string) {
 
         const data = await response.json()
 
-        // console.log("data before trnsformation  ==== === ",data)
-        if (data && data.encoding === "base64" && data.content) {
-            const bufferParse = Buffer.from(data.content, data.encoding)
-            // console.log("parsed  buffer  ==== === ", bufferParse)
-            const stringBuffer = bufferParse.toString()
-            // console.log("string buffer  ==== ", stringBuffer)
+            if (data && data.encoding === "base64" && data.content) {
+            const stringBuffer = Buffer.from(data.content, data.encoding).toString()
             const pgkjson = await JSON.parse(stringBuffer) as DecodedPackageJson
             return await modifyPackageJson(pgkjson)
-            // return await pgkjson
-            // return pgkjson
+
         }
         // console.log("data === ",data)
         return data as DecodedPackageJson

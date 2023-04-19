@@ -20,8 +20,8 @@ export async function getViewerRepos() {
         const response = await fetch('https://api.github.com/graphql', {
             method: 'POST',
             headers: {
-                //@ts-expect-error
-                "Authorization": `bearer ${import.meta.env.RAKKAS_GH_PAT}`,
+            
+                "Authorization": `bearer ${process.env.GH_PAT}`,
                 "Content-Type": "application/json",
                 "accept": "application/vnd.github.hawkgirl-preview+json"
             },

@@ -16,7 +16,9 @@ import {
     SiRollupdotjs,
     SiJest,
     SiVitest,
-    SiSupabase
+    SiSupabase,
+    SiNodemon
+
     
 } from 'react-icons/si'
 
@@ -41,7 +43,8 @@ export const subDepsIcons = {
     express: { icon: SiExpress, name: 'Express' },
     graphql: { icon: SiGraphql, name: 'GraphQL' },
     jest: { icon: SiJest, name: 'Jest' },
-    vitest: { icon: SiVitest, name: 'Vitest' }
+    vitest: { icon: SiVitest, name: 'Vitest' },
+    nodemon:{icon:SiNodemon,name:"Nodemon"},
 };
 
 

@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import about from "./routes/about";
+import repo from './routes/repo/repos';
 
 const ejs = require("ejs");
 const PORT=5000;    
@@ -18,12 +19,13 @@ const startServer=async()=>
 
 
     app.set("view engine", "ejs");
-
-      app.use(express.static("public"));
+    app.use(express.static("public"));
 
     app.get('/', (req: Request, res: Response) => {
       res.render("pages/index");
     });
+
+    app.use("/repo",repo);
     app.use("/about",about);
 
     app.listen(port, () => {
