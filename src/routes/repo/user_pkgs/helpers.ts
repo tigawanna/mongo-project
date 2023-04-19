@@ -1,33 +1,56 @@
 import { subDepsArr } from "./subdeps";
-import { RequiredDecodedPackageJson, TPkgType, DecodedPackageJson } from "./types";
+import { RequiredDecodedPackageJson, TPkgType, DecodedPackageJson, pkgTypesArr } from "./types";
 
 // condition to group packages based on their dependancies/devDependancies
-export function pkgTypeCondition(pkg: RequiredDecodedPackageJson): { pkg_type: TPkgType; condition: boolean; } {
-
-    if (pkg.devDependencies?.vite && pkg.devDependencies["@vitejs/plugin-react"]) {
-        return { pkg_type: "React+Vite", condition: true }
-    }
-    if (pkg.dependencies?.react && pkg.dependencies?.relay) {
-        return { pkg_type: "React+Relay", condition: true }
-    }
+export function pkgTypeCondition(pkg: RequiredDecodedPackageJson): { pkg_type:TPkgType; condition: boolean; } {
+    
     if (pkg.devDependencies?.rakkasjs) {
         return { pkg_type: "Rakkasjs", condition: true }
     }
-
+    
     if (pkg.dependencies?.next) {
         return { pkg_type: "Nextjs", condition: true }
     }
+
+    if (pkg.dependencies?.react && pkg.dependencies?.['react-relay']) {
+        return { pkg_type: "React+Relay", condition: true }
+    }
+
+    if (pkg.devDependencies?.vite && pkg.dependencies?.react) {
+        return { pkg_type: "React+Vite", condition: true }
+    }
+    
+
+
+
     if ((pkg.devDependencies?.nodemon || pkg.dependencies?.nodemon || pkg.dependancies?.express)) {
         return { pkg_type: "Nodejs", condition: true }
     }
     return { pkg_type: "Others", condition: false }
 }
 
+export function createPkgObject(pkg:DecodedPackageJson){
+    // @ts-expect-error
+    const pkgtypeObj:{[key in typeof pkgTypesArr[number]]:any} = {}
+    if("name" in pkg)
+    pkgTypesArr.map((key) => {
+        pkgtypeObj[key] = {
+            name: "",
+            dependencies:pkg.dependencies,
+            devDependencies: new Set(),
+            count: 0
+        }
+    })
+
+}
+
 //  modify package.json to addthe pkg_type 
 export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
 
     if ("name" in pgkjson) {
-        pgkjson['pkg_type'] = pkgTypeCondition(pgkjson).pkg_type
+        const typeCondition = pkgTypeCondition(pgkjson)
+        console.log("typeCondition", typeCondition)
+        pgkjson['pkg_type'] = typeCondition.pkg_type
 
         const alldeps = Object.keys(pgkjson.dependencies).map((key) => {
             return key.split('^')[0]
@@ -41,20 +64,6 @@ export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
                 return dep === key
             })
         })
-
-        // if(favdeps.length<15){
-        //   const favDepsSet = new Set(favdeps)
-        //     alldeps.map((dep) => {
-        //     if(favDepsSet.size <= 20){
-        //         //@ts-expect-error
-        //         favDepsSet.add(dep)
-        //     }
-        //     return
-        // })
-        // pgkjson['favdeps'] = Array.from(favDepsSet)
-        // return pgkjson
-        // }
-
 
         pgkjson['favdeps'] = favdeps
         return pgkjson

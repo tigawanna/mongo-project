@@ -90,6 +90,7 @@ function getAllReoosPackageJson() {
                 }
                 finally { if (e_1) throw e_1.error; }
             }
+            console.log("reposPkgJson === ", reposPkgJson);
             return reposPkgJson;
         }
         return new Error("viewer repositories not found");

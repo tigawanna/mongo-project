@@ -16,9 +16,10 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseReposMiddleware = exports.fetchAllRepos = void 0;
+exports.parseReposMiddleware = exports.createDefaultObject = exports.fetchAllRepos = void 0;
 const helpers_1 = require("./helpers");
 const helpers_2 = require("./user_pkgs/helpers");
+const types_1 = require("./user_pkgs/types");
 function fetchAllRepos(req, res, next) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -27,7 +28,7 @@ function fetchAllRepos(req, res, next) {
             req.pkgs = repos;
             const pkg_json_promises = [];
             try {
-                for (var _b = __asyncValues(repos.slice(0, 5)), _c; _c = yield _b.next(), !_c.done;) {
+                for (var _b = __asyncValues(repos.slice(0, 50)), _c; _c = yield _b.next(), !_c.done;) {
                     const repo = _c.value;
                     pkg_json_promises.push((0, helpers_2.getRepoPackageJson)(repo.nameWithOwner));
                 }
@@ -50,10 +51,38 @@ function fetchAllRepos(req, res, next) {
     });
 }
 exports.fetchAllRepos = fetchAllRepos;
+function createDefaultObject() {
+    return types_1.pkgTypesArr.reduce((acc, curr) => {
+        acc[curr] = {
+            name: null,
+            dependencies: [],
+            count: 0
+        };
+        return acc;
+    }, {});
+}
+exports.createDefaultObject = createDefaultObject;
 function parseReposMiddleware(req, res, next) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const pkgs = yield req.pkgs_json_promises;
-        res.send(pkgs);
+        const pkg_values = (_a = pkgs === null || pkgs === void 0 ? void 0 : pkgs.map((pkgjson) => ("value" in pkgjson) && pkgjson.value)) === null || _a === void 0 ? void 0 : _a.filter((pkgjson) => pkgjson);
+        const pkgs_obj = pkg_values && pkg_values.reduce((acc, curr) => {
+            var _a;
+            if (!curr.pkg_type) {
+                return acc;
+            }
+            const currDepsSet = curr.favdeps;
+            const oldArr = (_a = acc[curr.pkg_type]) === null || _a === void 0 ? void 0 : _a.dependencies;
+            const newDepsArr = [...oldArr, ...currDepsSet].slice(0, 10);
+            acc[curr.pkg_type] = {
+                name: curr.pkg_type,
+                dependencies: newDepsArr,
+                count: acc[curr.pkg_type].count + 1
+            };
+            return acc;
+        }, createDefaultObject());
+        res.json({ pkgs_obj, pkg_values });
         next();
     });
 }

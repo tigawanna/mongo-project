@@ -19,7 +19,8 @@ router.get("/all", async (req, res) => {
 
 router.post("/pkgs", fetchAllRepos,parseReposMiddleware, async (req: PkgsRequest, res) => {
 
- 
+  // const pkgs = await req.pkgs_json_promises
+  // res.send(pkgs);
 })
 
 export default router;

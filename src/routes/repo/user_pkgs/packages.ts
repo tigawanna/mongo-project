@@ -64,7 +64,7 @@ export async function getAllReoosPackageJson() {
                 throw error;
             }
         }
- 
+        console.log("reposPkgJson === ", reposPkgJson);
         return reposPkgJson;
     }
     return new Error("viewer repositories not found");

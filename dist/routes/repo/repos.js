@@ -24,5 +24,7 @@ router.get("/all", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     res.json({ all_repos });
 }));
 router.post("/pkgs", handlers_1.fetchAllRepos, handlers_1.parseReposMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // const pkgs = await req.pkgs_json_promises
+    // res.send(pkgs);
 }));
 exports.default = router;

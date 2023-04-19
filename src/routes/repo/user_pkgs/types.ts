@@ -71,6 +71,11 @@ export type DecodedPackageJson = (RequiredDecodedPackageJson & {
     favdeps?: string[],
     pkg_type?: TPkgType
 }) | BadDataGitHubError
+
+export type PlainDecodedPackageJson = (RequiredDecodedPackageJson & {
+    favdeps: string[],
+    pkg_type: TPkgType
+}) 
 export type DecodedPackageJsonList = (RequiredDecodedPackageJson)
 
 
@@ -96,3 +101,13 @@ export interface TPkgObjValue {
 export type TPkgObjs = { [key in DepsComBo]: TPkgObjValue }
 
 export type TPkgType = "React+Vite" | "React+Relay" | "Rakkasjs" | "Nextjs" | "Nodejs" | "Others"
+
+export const pkgTypesArr = ["React+Vite" , "React+Relay","Rakkasjs", "Nextjs", "Nodejs","Others"] as const
+
+export type TPkgTypeObj = { [key in typeof pkgTypesArr[number]]:
+    {
+    name: string|null; 
+    dependencies:string[];
+    count: number
+    } }
+

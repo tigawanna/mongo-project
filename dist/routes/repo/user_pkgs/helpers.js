@@ -9,34 +9,51 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRepoPackageJson = exports.modifyPackageJson = exports.pkgTypeCondition = void 0;
+exports.getRepoPackageJson = exports.modifyPackageJson = exports.createPkgObject = exports.pkgTypeCondition = void 0;
 const subdeps_1 = require("./subdeps");
+const types_1 = require("./types");
 // condition to group packages based on their dependancies/devDependancies
 function pkgTypeCondition(pkg) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
-    if (((_a = pkg.devDependencies) === null || _a === void 0 ? void 0 : _a.vite) && pkg.devDependencies["@vitejs/plugin-react"]) {
-        return { pkg_type: "React+Vite", condition: true };
-    }
-    if (((_b = pkg.dependencies) === null || _b === void 0 ? void 0 : _b.react) && ((_c = pkg.dependencies) === null || _c === void 0 ? void 0 : _c.relay)) {
-        return { pkg_type: "React+Relay", condition: true };
-    }
-    if ((_d = pkg.devDependencies) === null || _d === void 0 ? void 0 : _d.rakkasjs) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    if ((_a = pkg.devDependencies) === null || _a === void 0 ? void 0 : _a.rakkasjs) {
         return { pkg_type: "Rakkasjs", condition: true };
     }
-    if ((_e = pkg.dependencies) === null || _e === void 0 ? void 0 : _e.next) {
+    if ((_b = pkg.dependencies) === null || _b === void 0 ? void 0 : _b.next) {
         return { pkg_type: "Nextjs", condition: true };
     }
-    if ((((_f = pkg.devDependencies) === null || _f === void 0 ? void 0 : _f.nodemon) || ((_g = pkg.dependencies) === null || _g === void 0 ? void 0 : _g.nodemon) || ((_h = pkg.dependancies) === null || _h === void 0 ? void 0 : _h.express))) {
+    if (((_c = pkg.dependencies) === null || _c === void 0 ? void 0 : _c.react) && ((_d = pkg.dependencies) === null || _d === void 0 ? void 0 : _d['react-relay'])) {
+        return { pkg_type: "React+Relay", condition: true };
+    }
+    if (((_e = pkg.devDependencies) === null || _e === void 0 ? void 0 : _e.vite) && ((_f = pkg.dependencies) === null || _f === void 0 ? void 0 : _f.react)) {
+        return { pkg_type: "React+Vite", condition: true };
+    }
+    if ((((_g = pkg.devDependencies) === null || _g === void 0 ? void 0 : _g.nodemon) || ((_h = pkg.dependencies) === null || _h === void 0 ? void 0 : _h.nodemon) || ((_j = pkg.dependancies) === null || _j === void 0 ? void 0 : _j.express))) {
         return { pkg_type: "Nodejs", condition: true };
     }
     return { pkg_type: "Others", condition: false };
 }
 exports.pkgTypeCondition = pkgTypeCondition;
+function createPkgObject(pkg) {
+    // @ts-expect-error
+    const pkgtypeObj = {};
+    if ("name" in pkg)
+        types_1.pkgTypesArr.map((key) => {
+            pkgtypeObj[key] = {
+                name: "",
+                dependencies: pkg.dependencies,
+                devDependencies: new Set(),
+                count: 0
+            };
+        });
+}
+exports.createPkgObject = createPkgObject;
 //  modify package.json to addthe pkg_type 
 function modifyPackageJson(pgkjson) {
     return __awaiter(this, void 0, void 0, function* () {
         if ("name" in pgkjson) {
-            pgkjson['pkg_type'] = pkgTypeCondition(pgkjson).pkg_type;
+            const typeCondition = pkgTypeCondition(pgkjson);
+            console.log("typeCondition", typeCondition);
+            pgkjson['pkg_type'] = typeCondition.pkg_type;
             const alldeps = Object.keys(pgkjson.dependencies).map((key) => {
                 return key.split('^')[0];
             }).concat(Object.keys(pgkjson.devDependencies).map((key) => {
@@ -47,18 +64,6 @@ function modifyPackageJson(pgkjson) {
                     return dep === key;
                 });
             });
-            // if(favdeps.length<15){
-            //   const favDepsSet = new Set(favdeps)
-            //     alldeps.map((dep) => {
-            //     if(favDepsSet.size <= 20){
-            //         //@ts-expect-error
-            //         favDepsSet.add(dep)
-            //     }
-            //     return
-            // })
-            // pgkjson['favdeps'] = Array.from(favDepsSet)
-            // return pgkjson
-            // }
             pgkjson['favdeps'] = favdeps;
             return pgkjson;
         }
