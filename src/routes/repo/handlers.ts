@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { PkgsRequest } from './types';
 import { fetchRepos } from './helpers';
 import { getRepoPackageJson } from './user_pkgs/helpers';
-import {  pkgTypesArr, PlainDecodedPackageJson, TPkgType, TPkgTypeObj } from './user_pkgs/types';
+import {  pkgTypesArr, PlainDecodedPackageJson, TPkgTypeObj } from './user_pkgs/types';
 
 
 export async function fetchAllRepos(req: PkgsRequest, res: Response, next: NextFunction){

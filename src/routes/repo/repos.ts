@@ -1,7 +1,8 @@
 import express from "express";
-import { getViewerRepos } from "./user_pkgs/packages";
+
 import { fetchAllRepos, parseReposMiddleware } from "./handlers";
 import { PkgsRequest } from "./types";
+import { getViewerRepos } from "./user_pkgs/helpers";
 
 
 const router = express.Router();
@@ -18,8 +19,7 @@ router.get("/all", async (req, res) => {
 
 
 router.post("/pkgs", fetchAllRepos,parseReposMiddleware, async (req: PkgsRequest, res) => {
-
-  // const pkgs = await req.pkgs_json_promises
+// const pkgs = await req.pkgs_json_promises
   // res.send(pkgs);
 })
 

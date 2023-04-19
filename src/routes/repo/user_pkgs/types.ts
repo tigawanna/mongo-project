@@ -111,3 +111,6 @@ export type TPkgTypeObj = { [key in typeof pkgTypesArr[number]]:
     count: number
     } }
 
+
+
+// export type IMostFaveDeps = `${typeof mostFaveDepsList[number]}`;

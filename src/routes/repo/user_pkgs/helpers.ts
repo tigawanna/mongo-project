@@ -1,5 +1,76 @@
-import { subDepsArr } from "./subdeps";
-import { RequiredDecodedPackageJson, TPkgType, DecodedPackageJson, pkgTypesArr } from "./types";
+import { RequiredDecodedPackageJson, TPkgType, DecodedPackageJson, pkgTypesArr, ViewerRepos } from "./types";
+
+
+
+
+
+
+export async function getViewerRepos() {
+    const query = `
+    query($first: Int!) {
+    viewer {
+    repositories(first:$first,isFork: false, orderBy: {field: PUSHED_AT, direction: DESC}) {
+      nodes {
+        id
+        name
+        nameWithOwner
+      }
+    }
+  }
+}
+`
+    try {
+        const response = await fetch('https://api.github.com/graphql', {
+            method: 'POST',
+            headers: {
+
+                "Authorization": `bearer ${process.env.GH_PAT}`,
+                "Content-Type": "application/json",
+                "accept": "application/vnd.github.hawkgirl-preview+json"
+            },
+            body: JSON.stringify({
+                query,
+                variables: {
+                    first: 50
+                },
+                // operationName,
+            }),
+        })
+        const data = await response.json() as unknown as ViewerRepos
+        // console.log("#step 1 : all user repositories ===== ", data)
+        return data
+
+    } catch (err) {
+        console.log("error fetching viewer repos  ==> ", err)
+        return err as ViewerRepos
+    }
+}
+
+export async function getAllReoosPackageJson() {
+    const repos = await getViewerRepos();
+    const reposPkgJson: DecodedPackageJson[] = [];
+    if ("viewer" in repos.data) {
+        const reposList = repos.data.viewer.repositories.nodes
+
+        for await (const repo of reposList) {
+            try {
+                const pkgjson = await getRepoPackageJson(repo.nameWithOwner);
+                if (pkgjson) {
+                    reposPkgJson.push(pkgjson);
+                }
+            } catch (error) {
+                console.log("error fetching list of  package.jsons >>>>>>>>>>> ", error);
+                throw error;
+            }
+        }
+        // console.log("reposPkgJson === ", reposPkgJson);
+        return reposPkgJson;
+    }
+    return new Error("viewer repositories not found");
+}
+
+
+
 
 // condition to group packages based on their dependancies/devDependancies
 export function pkgTypeCondition(pkg: RequiredDecodedPackageJson): { pkg_type:TPkgType; condition: boolean; } {
@@ -7,7 +78,7 @@ export function pkgTypeCondition(pkg: RequiredDecodedPackageJson): { pkg_type:TP
     if (pkg.devDependencies?.rakkasjs) {
         return { pkg_type: "Rakkasjs", condition: true }
     }
-    
+
     if (pkg.dependencies?.next) {
         return { pkg_type: "Nextjs", condition: true }
     }
@@ -20,10 +91,7 @@ export function pkgTypeCondition(pkg: RequiredDecodedPackageJson): { pkg_type:TP
         return { pkg_type: "React+Vite", condition: true }
     }
     
-
-
-
-    if ((pkg.devDependencies?.nodemon || pkg.dependencies?.nodemon || pkg.dependancies?.express)) {
+     if ((pkg.devDependencies?.nodemon || pkg.dependencies?.nodemon || pkg.dependancies?.express)) {
         return { pkg_type: "Nodejs", condition: true }
     }
     return { pkg_type: "Others", condition: false }
@@ -44,6 +112,12 @@ export function createPkgObject(pkg:DecodedPackageJson){
 
 }
 
+
+export const mostFaveDepsList = [
+    "tailwindcss", "supabase", "typescript", "react-router-dom", "react-icons",
+    "firebase", "dayjs", "axios", "socket.io", "pocketbase", "react-to-print",
+    "react-query", "rollup", "express", "graphql", "jest", "vitest", "nodemon"]
+
 //  modify package.json to addthe pkg_type 
 export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
 
@@ -59,7 +133,7 @@ export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
         })
         )
 
-        const favdeps = subDepsArr.filter((key) => {
+        const favdeps = mostFaveDepsList.filter((key) => {
             return alldeps.find((dep) => {
                 return dep === key
             })

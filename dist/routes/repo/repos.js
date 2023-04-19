@@ -13,14 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const packages_1 = require("./user_pkgs/packages");
 const handlers_1 = require("./handlers");
+const helpers_1 = require("./user_pkgs/helpers");
 const router = express_1.default.Router();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send("repos page ");
 }));
 router.get("/all", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const all_repos = yield (0, packages_1.getViewerRepos)();
+    const all_repos = yield (0, helpers_1.getViewerRepos)();
     res.json({ all_repos });
 }));
 router.post("/pkgs", handlers_1.fetchAllRepos, handlers_1.parseReposMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
