@@ -1,9 +1,11 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import about from "./routes/about";
-import repo from './routes/repo/repos';
-import bodyParser from 'body-parser'
 import github from  './routes/github/github';
+
+import mongoose from 'mongoose';
+import { logSuccess } from './utils/helpers';
+import { GroupedRepo } from './mongo/schema';
 
 const ejs = require("ejs");
 const PORT=5000;    
@@ -16,9 +18,29 @@ const startServer=async()=>
     const app: Express = express();
     const port = process.env.PORT?process.env.PORT:PORT;
     app.use(express.json());
-    // app.use(express.static(__dirname + '/public'));
 
+  // const MONGODB_URI = 'mongodb://localhost:27017/green';
 
+  // mongoose.connect(MONGODB_URI);
+
+  // const db = mongoose.connection;
+
+  // db.on('error', console.error.bind(console, 'MongoDB connection error: '));
+
+  // db.once('open', () => {
+  //   logSuccess('MongoDB connection successful!');
+  //   const groupedCollection = db.collection('grouped');
+  //   // Do something with the collection here...
+  // })
+  //   // app.use(express.static(__dirname + '/public'));
+
+    mongoose.connect('mongodb://127.0.0.1:27017/green').then(
+      async() => {
+        logSuccess('MongoDb Connected!')
+        // const aggr_repos = await GroupedRepo.findById('6441a9c829c381bc7473bf0d')
+        // logSuccess("by Id  ", aggr_repos);
+      }
+      );
 
     app.set("view engine", "ejs");
     app.use(express.static("public"));
@@ -27,7 +49,7 @@ const startServer=async()=>
       res.render("pages/index");
     });
 
-    app.use("/repo",repo);
+ 
     app.use("/github",github);
     app.use("/about",about);
 

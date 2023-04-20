@@ -1,11 +1,23 @@
-import chalk from 'chalk';
+import kleur from 'kleur';
 
-export const log = (msg: string) => {
-    console.log(chalk.green(msg));
+export function logNormal(message:string,data?:any) {
+
+    console.log(kleur.blue(`${message}`))
+    data && console.log(data);
 }
 
-function logger(color: string, msg: string) {
-    console.log(chalk[color](msg));
 
+export function logSuccess(message:string, data?:any) {
+    console.log(kleur.green(`Success: ${message}`));
+    data && console.log(data);
 }
 
+export function logWarning(message: string, data?: any) {
+    console.log(kleur.yellow(`Warning: ${message}`));
+    data&&console.log(data);
+}
+
+export function logError(message: string, data?: any) {
+    console.log(kleur.red(`Error: ${message}`));
+    data&&console.log(data);
+}

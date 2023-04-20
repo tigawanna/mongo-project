@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getViewerRepos = void 0;
+exports.getOneRepoPackageJson = exports.modifyPackageJson = exports.mostFaveDepsList = exports.createPkgObject = exports.pkgTypeCondition = exports.getViewerRepos = void 0;
+const type_1 = require("./type");
 function getViewerRepos(viewer_token) {
     return __awaiter(this, void 0, void 0, function* () {
         // console.log("viewerr token  === ", viewer_token)
@@ -43,17 +44,107 @@ function getViewerRepos(viewer_token) {
                 }),
             });
             const data = yield response.json();
-            console.log("all user repositories ===== ", data);
             if ("message" in data) {
-                console.log("error fetching viewer repos  ==> ", data);
+                console.log("throw error fetching viewer repos  ==> ", data);
                 throw data;
             }
+            console.log("all user repositories ===== ", data);
             return data;
         }
         catch (err) {
-            console.log("error fetching viewer repos  ==> ", err);
+            console.log("catch error fetching viewer repos ==> ", err);
             return err;
         }
     });
 }
 exports.getViewerRepos = getViewerRepos;
+function pkgTypeCondition(pkg) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    if ((_a = pkg.devDependencies) === null || _a === void 0 ? void 0 : _a.rakkasjs) {
+        return { pkg_type: "Rakkasjs", condition: true };
+    }
+    if ((_b = pkg.dependencies) === null || _b === void 0 ? void 0 : _b.next) {
+        return { pkg_type: "Nextjs", condition: true };
+    }
+    if (((_c = pkg.dependencies) === null || _c === void 0 ? void 0 : _c.react) && ((_d = pkg.dependencies) === null || _d === void 0 ? void 0 : _d['react-relay'])) {
+        return { pkg_type: "React+Relay", condition: true };
+    }
+    if (((_e = pkg.devDependencies) === null || _e === void 0 ? void 0 : _e.vite) && ((_f = pkg.dependencies) === null || _f === void 0 ? void 0 : _f.react)) {
+        return { pkg_type: "React+Vite", condition: true };
+    }
+    if ((((_g = pkg.devDependencies) === null || _g === void 0 ? void 0 : _g.nodemon) || ((_h = pkg.dependencies) === null || _h === void 0 ? void 0 : _h.nodemon) || ((_j = pkg.dependancies) === null || _j === void 0 ? void 0 : _j.express))) {
+        return { pkg_type: "Nodejs", condition: true };
+    }
+    return { pkg_type: "Others", condition: false };
+}
+exports.pkgTypeCondition = pkgTypeCondition;
+function createPkgObject(pkg) {
+    // @ts-expect-error
+    const pkgtypeObj = {};
+    if ("name" in pkg)
+        type_1.pkgTypesArr.map((key) => {
+            pkgtypeObj[key] = {
+                name: "",
+                dependencies: pkg.dependencies,
+                devDependencies: new Set(),
+                count: 0
+            };
+        });
+}
+exports.createPkgObject = createPkgObject;
+exports.mostFaveDepsList = [
+    "tailwindcss", "supabase", "typescript", "react-router-dom", "react-icons",
+    "firebase", "dayjs", "axios", "socket.io", "pocketbase", "react-to-print",
+    "react-query", "rollup", "express", "graphql", "jest", "vitest", "nodemon"
+];
+//  modify package.json to addthe pkg_type 
+function modifyPackageJson(pgkjson) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if ("name" in pgkjson) {
+            const typeCondition = pkgTypeCondition(pgkjson);
+            console.log("typeCondition", typeCondition);
+            pgkjson['pkg_type'] = typeCondition.pkg_type;
+            const alldeps = Object.keys(pgkjson.dependencies).map((key) => {
+                return key.split('^')[0];
+            }).concat(Object.keys(pgkjson.devDependencies).map((key) => {
+                return key.split('^')[0];
+            }));
+            const favdeps = exports.mostFaveDepsList.filter((key) => {
+                return alldeps.find((dep) => {
+                    return dep === key;
+                });
+            });
+            pgkjson['favdeps'] = favdeps;
+            return pgkjson;
+        }
+        return pgkjson;
+    });
+}
+exports.modifyPackageJson = modifyPackageJson;
+//  get repository package.json
+function getOneRepoPackageJson(owner_repo) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const headersList = {
+                "Authorization": `bearer ${process.env.GH_PAT}`,
+            };
+            const response = yield fetch(`https://api.github.com/repos/${owner_repo}/contents/package.json`, {
+                method: "GET",
+                headers: headersList
+            });
+            const data = yield response.json();
+            if (data && data.encoding === "base64" && data.content) {
+                const stringBuffer = Buffer.from(data.content, data.encoding).toString();
+                const pgkjson = yield JSON.parse(stringBuffer);
+                return yield modifyPackageJson(pgkjson);
+            }
+            // console.log("data === ",data)
+            return data;
+        }
+        catch (error) {
+            console.log("error fetching package.json >>>>>>>>>>>>  ", error);
+            return error;
+        }
+    });
+}
+exports.getOneRepoPackageJson = getOneRepoPackageJson;

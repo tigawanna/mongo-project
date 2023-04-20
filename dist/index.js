@@ -15,8 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const about_1 = __importDefault(require("./routes/about"));
-const repos_1 = __importDefault(require("./routes/repo/repos"));
 const github_1 = __importDefault(require("./routes/github/github"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const helpers_1 = require("./utils/helpers");
 const ejs = require("ejs");
 const PORT = 5000;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -24,13 +25,26 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
     const port = process.env.PORT ? process.env.PORT : PORT;
     app.use(express_1.default.json());
-    // app.use(express.static(__dirname + '/public'));
+    // const MONGODB_URI = 'mongodb://localhost:27017/green';
+    // mongoose.connect(MONGODB_URI);
+    // const db = mongoose.connection;
+    // db.on('error', console.error.bind(console, 'MongoDB connection error: '));
+    // db.once('open', () => {
+    //   logSuccess('MongoDB connection successful!');
+    //   const groupedCollection = db.collection('grouped');
+    //   // Do something with the collection here...
+    // })
+    //   // app.use(express.static(__dirname + '/public'));
+    mongoose_1.default.connect('mongodb://127.0.0.1:27017/green').then(() => __awaiter(void 0, void 0, void 0, function* () {
+        (0, helpers_1.logSuccess)('MongoDb Connected!');
+        // const aggr_repos = await GroupedRepo.findById('6441a9c829c381bc7473bf0d')
+        // logSuccess("by Id  ", aggr_repos);
+    }));
     app.set("view engine", "ejs");
     app.use(express_1.default.static("public"));
     app.get('/', (req, res) => {
         res.render("pages/index");
     });
-    app.use("/repo", repos_1.default);
     app.use("/github", github_1.default);
     app.use("/about", about_1.default);
     app.listen(port, () => {

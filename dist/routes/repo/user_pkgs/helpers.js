@@ -62,36 +62,43 @@ function getViewerRepos(viewer_token) {
 }
 exports.getViewerRepos = getViewerRepos;
 function getAllReoosPackageJson(viewer_token) {
-    var e_1, _a;
-    var _b;
+    var _a, e_1, _b, _c;
+    var _d;
     return __awaiter(this, void 0, void 0, function* () {
         const repos = yield getViewerRepos(viewer_token);
-        if (repos.data && "message" in repos.data && ((_b = repos.data) === null || _b === void 0 ? void 0 : _b.documentation_url)) {
+        if (repos.data && "message" in repos.data && ((_d = repos.data) === null || _d === void 0 ? void 0 : _d.documentation_url)) {
             console.log("repos.data.documentation_url === ", repos.data.documentation_url);
-            throw new types_1.CustomError("error getting all repos ", new Error(repos.data.message));
+            throw new Error(repos.data.message);
         }
         const reposPkgJson = [];
         if (repos.data && "viewer" in repos.data) {
             const reposList = repos.data.viewer.repositories.nodes;
             try {
-                for (var reposList_1 = __asyncValues(reposList), reposList_1_1; reposList_1_1 = yield reposList_1.next(), !reposList_1_1.done;) {
-                    const repo = reposList_1_1.value;
+                for (var _e = true, reposList_1 = __asyncValues(reposList), reposList_1_1; reposList_1_1 = yield reposList_1.next(), _a = reposList_1_1.done, !_a;) {
+                    _c = reposList_1_1.value;
+                    _e = false;
                     try {
-                        const pkgjson = yield getOneRepoPackageJson(repo.nameWithOwner);
-                        if (pkgjson) {
-                            reposPkgJson.push(pkgjson);
+                        const repo = _c;
+                        try {
+                            const pkgjson = yield getOneRepoPackageJson(repo.nameWithOwner);
+                            if (pkgjson) {
+                                reposPkgJson.push(pkgjson);
+                            }
+                        }
+                        catch (error) {
+                            console.log("error fetching list of  package.jsons >>>>>>>>>>> ", error);
+                            throw error;
                         }
                     }
-                    catch (error) {
-                        console.log("error fetching list of  package.jsons >>>>>>>>>>> ", error);
-                        throw error;
+                    finally {
+                        _e = true;
                     }
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
             finally {
                 try {
-                    if (reposList_1_1 && !reposList_1_1.done && (_a = reposList_1.return)) yield _a.call(reposList_1);
+                    if (!_e && !_a && (_b = reposList_1.return)) yield _b.call(reposList_1);
                 }
                 finally { if (e_1) throw e_1.error; }
             }

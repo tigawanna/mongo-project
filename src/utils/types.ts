@@ -13,3 +13,14 @@ declare global {
         extends z.infer<typeof envVariables> {}
     }
 }
+
+
+export class CustomError extends Error {
+    cause?: Error;
+    constructor(message: string, cause?: Error) {
+        super(message);
+        Error.captureStackTrace(this, this.constructor);
+        this.name = this.constructor.name;
+        this.cause = cause;
+    }
+}
