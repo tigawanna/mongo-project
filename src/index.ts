@@ -2,6 +2,8 @@ import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import about from "./routes/about";
 import repo from './routes/repo/repos';
+import bodyParser from 'body-parser'
+import github from  './routes/github/github';
 
 const ejs = require("ejs");
 const PORT=5000;    
@@ -13,7 +15,7 @@ const startServer=async()=>
     
     const app: Express = express();
     const port = process.env.PORT?process.env.PORT:PORT;
-    
+    app.use(express.json());
     // app.use(express.static(__dirname + '/public'));
 
 
@@ -26,6 +28,7 @@ const startServer=async()=>
     });
 
     app.use("/repo",repo);
+    app.use("/github",github);
     app.use("/about",about);
 
     app.listen(port, () => {

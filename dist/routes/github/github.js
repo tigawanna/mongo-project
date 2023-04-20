@@ -13,22 +13,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const handlers_1 = require("./handlers");
-const helpers_1 = require("./user_pkgs/helpers");
+const helpers_1 = require("./helpers");
 const router = express_1.default.Router();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.send("repos page ");
-}));
-router.get("/all", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const all_repos = yield (0, helpers_1.getViewerRepos)((_a = req.body) === null || _a === void 0 ? void 0 : _a.viewer_token);
     res.json({ all_repos });
 }));
-router.post("/pkgs", handlers_1.fetchAllRepos, handlers_1.parseReposMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log("request.body  ", req.body)
-    var _b;
-    if (!((_b = req.body) === null || _b === void 0 ? void 0 : _b.viewer_token)) {
-        res.status(400).send({ "error": "github token required " });
+router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c;
+    console.log("requeets.body    === ", req.body);
+    const all_repos = yield (0, helpers_1.getViewerRepos)((_b = req.body) === null || _b === void 0 ? void 0 : _b.viewer_token);
+    if (!((_c = req === null || req === void 0 ? void 0 : req.body) === null || _c === void 0 ? void 0 : _c.viewer_token)) {
+        res.status(400).send(new Error("viewer_token is required"));
+        return;
     }
+    if (all_repos && "message" in all_repos) {
+        console.log("error loading  viewer repos  ==> ", all_repos);
+        res.status(400).send(new Error(all_repos.message));
+    }
+    res.json({ all_repos });
 }));
 exports.default = router;

@@ -114,3 +114,13 @@ export type TPkgTypeObj = { [key in typeof pkgTypesArr[number]]:
 
 
 // export type IMostFaveDeps = `${typeof mostFaveDepsList[number]}`;
+
+export class CustomError extends Error {
+    cause?: Error;
+    constructor(message: string, cause?: Error) {
+        super(message);
+        Error.captureStackTrace(this, this.constructor);
+        this.name = this.constructor.name;
+        this.cause = cause;
+    }
+}

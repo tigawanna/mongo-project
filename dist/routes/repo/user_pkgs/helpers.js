@@ -16,10 +16,11 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRepoPackageJson = exports.modifyPackageJson = exports.mostFaveDepsList = exports.createPkgObject = exports.pkgTypeCondition = exports.getAllReoosPackageJson = exports.getViewerRepos = void 0;
+exports.getOneRepoPackageJson = exports.modifyPackageJson = exports.mostFaveDepsList = exports.createPkgObject = exports.pkgTypeCondition = exports.getAllReoosPackageJson = exports.getViewerRepos = void 0;
 const types_1 = require("./types");
-function getViewerRepos() {
+function getViewerRepos(viewer_token) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log("viewerr token  === ", viewer_token);
         const query = `
     query($first: Int!) {
     viewer {
@@ -37,7 +38,7 @@ function getViewerRepos() {
             const response = yield fetch('https://api.github.com/graphql', {
                 method: 'POST',
                 headers: {
-                    "Authorization": `bearer ${process.env.GH_PAT}`,
+                    "Authorization": `bearer ${viewer_token}`,
                     "Content-Type": "application/json",
                     "accept": "application/vnd.github.hawkgirl-preview+json"
                 },
@@ -50,7 +51,7 @@ function getViewerRepos() {
                 }),
             });
             const data = yield response.json();
-            // console.log("#step 1 : all user repositories ===== ", data)
+            console.log("all user repositories ===== ", data);
             return data;
         }
         catch (err) {
@@ -60,18 +61,23 @@ function getViewerRepos() {
     });
 }
 exports.getViewerRepos = getViewerRepos;
-function getAllReoosPackageJson() {
+function getAllReoosPackageJson(viewer_token) {
     var e_1, _a;
+    var _b;
     return __awaiter(this, void 0, void 0, function* () {
-        const repos = yield getViewerRepos();
+        const repos = yield getViewerRepos(viewer_token);
+        if (repos.data && "message" in repos.data && ((_b = repos.data) === null || _b === void 0 ? void 0 : _b.documentation_url)) {
+            console.log("repos.data.documentation_url === ", repos.data.documentation_url);
+            throw new types_1.CustomError("error getting all repos ", new Error(repos.data.message));
+        }
         const reposPkgJson = [];
-        if ("viewer" in repos.data) {
+        if (repos.data && "viewer" in repos.data) {
             const reposList = repos.data.viewer.repositories.nodes;
             try {
                 for (var reposList_1 = __asyncValues(reposList), reposList_1_1; reposList_1_1 = yield reposList_1.next(), !reposList_1_1.done;) {
                     const repo = reposList_1_1.value;
                     try {
-                        const pkgjson = yield getRepoPackageJson(repo.nameWithOwner);
+                        const pkgjson = yield getOneRepoPackageJson(repo.nameWithOwner);
                         if (pkgjson) {
                             reposPkgJson.push(pkgjson);
                         }
@@ -161,7 +167,7 @@ function modifyPackageJson(pgkjson) {
 }
 exports.modifyPackageJson = modifyPackageJson;
 //  get repository package.json
-function getRepoPackageJson(owner_repo) {
+function getOneRepoPackageJson(owner_repo) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const headersList = {
@@ -186,4 +192,4 @@ function getRepoPackageJson(owner_repo) {
         }
     });
 }
-exports.getRepoPackageJson = getRepoPackageJson;
+exports.getOneRepoPackageJson = getOneRepoPackageJson;

@@ -16,12 +16,14 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const about_1 = __importDefault(require("./routes/about"));
 const repos_1 = __importDefault(require("./routes/repo/repos"));
+const github_1 = __importDefault(require("./routes/github/github"));
 const ejs = require("ejs");
 const PORT = 5000;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     dotenv_1.default.config();
     const app = (0, express_1.default)();
     const port = process.env.PORT ? process.env.PORT : PORT;
+    app.use(express_1.default.json());
     // app.use(express.static(__dirname + '/public'));
     app.set("view engine", "ejs");
     app.use(express_1.default.static("public"));
@@ -29,6 +31,7 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
         res.render("pages/index");
     });
     app.use("/repo", repos_1.default);
+    app.use("/github", github_1.default);
     app.use("/about", about_1.default);
     app.listen(port, () => {
         console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);

@@ -1,11 +1,9 @@
-import { RequiredDecodedPackageJson, TPkgType, DecodedPackageJson, pkgTypesArr, ViewerRepos } from "./types";
+import { RequiredDecodedPackageJson, TPkgType, DecodedPackageJson, pkgTypesArr, ViewerRepos, CustomError } from "./types";
 
 
 
-
-
-
-export async function getViewerRepos() {
+export async function getViewerRepos(viewer_token:string) {
+    console.log("viewerr token  === ", viewer_token)
     const query = `
     query($first: Int!) {
     viewer {
@@ -24,7 +22,7 @@ export async function getViewerRepos() {
             method: 'POST',
             headers: {
 
-                "Authorization": `bearer ${process.env.GH_PAT}`,
+                "Authorization": `bearer ${viewer_token}`,
                 "Content-Type": "application/json",
                 "accept": "application/vnd.github.hawkgirl-preview+json"
             },
@@ -37,7 +35,7 @@ export async function getViewerRepos() {
             }),
         })
         const data = await response.json() as unknown as ViewerRepos
-        // console.log("#step 1 : all user repositories ===== ", data)
+        console.log("all user repositories ===== ", data)
         return data
 
     } catch (err) {
@@ -46,15 +44,21 @@ export async function getViewerRepos() {
     }
 }
 
-export async function getAllReoosPackageJson() {
-    const repos = await getViewerRepos();
+export async function getAllReoosPackageJson(viewer_token:string) {
+
+    const repos = await getViewerRepos(viewer_token);
+    if (repos.data &&  "message" in repos.data && repos.data?.documentation_url){
+        console.log("repos.data.documentation_url === ", repos.data.documentation_url)
+        throw new CustomError("error getting all repos ",new Error(repos.data.message))
+    }
+
     const reposPkgJson: DecodedPackageJson[] = [];
-    if ("viewer" in repos.data) {
+    if (repos.data  && "viewer" in repos.data) {
         const reposList = repos.data.viewer.repositories.nodes
 
         for await (const repo of reposList) {
             try {
-                const pkgjson = await getRepoPackageJson(repo.nameWithOwner);
+                const pkgjson = await getOneRepoPackageJson(repo.nameWithOwner);
                 if (pkgjson) {
                     reposPkgJson.push(pkgjson);
                 }
@@ -147,7 +151,7 @@ export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
 }
 
 //  get repository package.json
-export async function getRepoPackageJson(owner_repo: string) {
+export async function getOneRepoPackageJson(owner_repo: string) {
     try {
         const headersList = {
             "Authorization": `bearer ${process.env.GH_PAT}`,

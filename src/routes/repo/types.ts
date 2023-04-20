@@ -9,5 +9,5 @@ export interface IPkgRepo{
 
 export interface PkgsRequest extends Request {
     pkgs?: IPkgRepo[];
-    pkgs_json_promises?:Promise<PromiseSettledResult<DecodedPackageJson>[]>
+    pkgs_json_promises?:DecodedPackageJson[]
 }

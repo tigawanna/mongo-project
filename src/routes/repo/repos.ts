@@ -12,15 +12,18 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/all", async (req, res) => {
-  const all_repos  = await getViewerRepos()
+  const all_repos  = await getViewerRepos(req.body?.viewer_token)
   res.json({all_repos});
 });
 
 
 
 router.post("/pkgs", fetchAllRepos,parseReposMiddleware, async (req: PkgsRequest, res) => {
-// const pkgs = await req.pkgs_json_promises
-  // res.send(pkgs);
+  // console.log("request.body  ", req.body)
+
+  if (!req.body?.viewer_token) {
+    res.status(400).send({ "error": "github token required " });
+  }
 })
 
 export default router;
