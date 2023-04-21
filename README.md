@@ -1,40 +1,9 @@
-# HELLO
-### this is a nodejs-express-typescript projectwhich yu can use an a starting point by cloning or follow te steps i sued to set it up below
+# Mongo Project
+Simple Nodejs + Express + Typescript + MongoDB project for aggregating a user'sprojects i=on github based on thier package.jsons (Javascript/Typscript only )
 
-  ```mmkdir mkdir node-express-typescript ```<br/>
-```cd node-express-typescript/```<br/>
-```npm init --yes```<br/>
+```sh
+/github : to get the aggregated data,
 
-### then we install some packages
-
-  ``` npm install express dotenv ```<br/>
- ``` npm i -D typescript @types/express @types/node ```<br/>
- ``` npm install -D concurrently nodemon```<br/>
-
-
-then run 
-```npx tsc --init ```<br/>
-to configure typescript
-
-don't forget to add the outdir option
-```{
-  "compilerOptions": {
-    "outDir": "./dist"
-
-    // rest options remain same
-  }
-}
+/github/batch_create : to populate the MongoDB database with the package.jsons
+/github/batch_update : to update the MongoDB database with the package.jsons (will be exscuted on a daily cronjob )
 ```
-<br/>
-
-and the scripts
-```
-{
-  "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
-  }
-}
-```
-<br/>
