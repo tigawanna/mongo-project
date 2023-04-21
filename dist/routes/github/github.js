@@ -104,3 +104,30 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.status(400).send(new Error("viewer repositories not found"));
 }));
 exports.default = router;
+// [
+//   {
+//     "$group": {
+//       "_id": "$pkg_type",
+//       "repo_names": { "$push": "$name" },
+//       "top_favdeps": { "$push": "$favdeps" }
+//     }
+//   },
+//   {
+//     "$unwind": "$top_favdeps"
+//   },
+//   {
+//     $sort: {
+//       "top_favdeps": -1
+//     }
+//   },
+//   {
+//     "$unwind": "$top_favdeps"
+//   },
+//   {
+//     "$group": {
+//       "_id": "$_id",
+//       "repo_names": { "$first": "$repo_names" },
+//       "top_favdeps": { "$addToSet": "$top_favdeps" }
+//     }
+//   }
+// ]
