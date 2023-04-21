@@ -53,10 +53,10 @@ function getViewerRepos(viewer_token) {
             });
             const data = yield response.json();
             if ("message" in data) {
-                console.log("throw error fetching viewer repos  ==> ", data);
+                (0, helpers_1.logError)("throw error fetching viewer repos  ==> ", data);
                 throw data;
             }
-            console.log("all user repositories ===== ", data);
+            (0, helpers_1.logError)("all user repositories ===== ", data);
             return data;
         }
         catch (err) {
@@ -150,7 +150,7 @@ function getOneRepoPackageJson(owner_repo) {
             return data;
         }
         catch (error) {
-            console.log("error fetching package.json >>>>>>>>>>>>  ", error);
+            (0, helpers_1.logError)("error getOneRepoPackageJson >>>>>>>>>>>>  ", error);
             return error;
         }
     });

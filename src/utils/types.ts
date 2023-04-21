@@ -2,7 +2,8 @@ import { z } from "zod";
 
 const envVariables = z.object({
     NODE_ENV: z.enum(["development", "test", "production"]),
-    GH_PAT:z.string()
+    GH_PAT:z.string(),
+    ATLAS_PWD:z.string(),
 })
 
 envVariables.parse(process.env)

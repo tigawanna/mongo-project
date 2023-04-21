@@ -37,10 +37,10 @@ export async function getViewerRepos(viewer_token: string) {
 
 
         if("message" in data){
-            console.log("throw error fetching viewer repos  ==> ", data)
+            logError("throw error fetching viewer repos  ==> ", data)
             throw data
         }
-        console.log("all user repositories ===== ", data)
+            logError("all user repositories ===== ", data)
         return data
 
     } catch (err) {
@@ -149,7 +149,7 @@ export async function getOneRepoPackageJson(owner_repo: string) {
 
     }
     catch (error) {
-        console.log("error fetching package.json >>>>>>>>>>>>  ", error)
+        logError("error getOneRepoPackageJson >>>>>>>>>>>>  ", error)
         return error as DecodedPackageJson
     }
 

@@ -54,15 +54,18 @@ router.post("/batch_create", (req, res) => __awaiter(void 0, void 0, void 0, fun
             return;
         }
         const reposPkgJson = yield (0, helpers_1.computeAllPkgJsons)(req.body.viewer_token);
-        const repo_insert_res = yield (0, mutations_1.batchCreateRepos)(reposPkgJson);
-        res.json({ "batch repo insertion ": repo_insert_res });
+        const parsedRepos = reposPkgJson.filter((repo) => (repo && ("name" in repo) && repo.name && repo.pkg_type));
+        const repo_insert_res = yield (0, mutations_1.batchCreateRepos)(parsedRepos);
+        (0, helpers_2.logSuccess)("repo_insert_res gotten=== ", repo_insert_res);
+        res.json({ repo_insert_res });
+        return;
     }
     catch (error) {
         (0, helpers_2.logError)("error in the batch_create catch block  ==> ", error);
         res.status(400).send({ error });
     }
-    (0, helpers_2.logError)("viewer repos not found");
-    res.status(400).send(new Error("viewer repositories not found"));
+    // logError("viewer repos not found");
+    // res.status(400).send(new Error("viewer repositories not found"))
 }));
 router.put("/batch_update", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _c;
@@ -72,7 +75,8 @@ router.put("/batch_update", (req, res) => __awaiter(void 0, void 0, void 0, func
             return;
         }
         const reposPkgJson = yield (0, helpers_1.computeAllPkgJsons)(req.body.viewer_token);
-        const repo_insert_res = yield (0, mutations_1.batchUpdateRepos)(reposPkgJson);
+        const parsedRepos = reposPkgJson.filter((repo) => (repo && ("name" in repo) && repo.name && repo.pkg_type));
+        const repo_insert_res = yield (0, mutations_1.batchUpdateRepos)(parsedRepos);
         res.json({ "batch repo update ": repo_insert_res });
     }
     catch (error) {

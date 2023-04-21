@@ -4,7 +4,8 @@ exports.CustomError = void 0;
 const zod_1 = require("zod");
 const envVariables = zod_1.z.object({
     NODE_ENV: zod_1.z.enum(["development", "test", "production"]),
-    GH_PAT: zod_1.z.string()
+    GH_PAT: zod_1.z.string(),
+    ATLAS_PWD: zod_1.z.string(),
 });
 envVariables.parse(process.env);
 class CustomError extends Error {

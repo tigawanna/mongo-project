@@ -33,8 +33,11 @@ const startServer=async()=>
   //   // Do something with the collection here...
   // })
   //   // app.use(express.static(__dirname + '/public'));
+  
+  const PROD_MONGODB_URI = `mongodb+srv://denniskinuthiaw:${process.env.ATLAS_PWD}@frankfurt-cluster.htmeu8w.mongodb.net/?retryWrites=true&w=majority`
+  const LOCAL_MONGODB_URI = `mongodb://localhost:27017/green`
 
-    mongoose.connect('mongodb://127.0.0.1:27017/green').then(
+  mongoose.connect(PROD_MONGODB_URI).then(
       async() => {
         logSuccess('MongoDb Connected!')
         // const aggr_repos = await GroupedRepo.findById('6441a9c829c381bc7473bf0d')

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export interface IGroupedRepo{
     name: string
-    type: string
+    // type: string
     devDependencies: {[key:string]:string }
     dependencies:{[key:string]:string}
     pkg_type: string
@@ -12,7 +12,7 @@ export interface IGroupedRepo{
 
 const GroupedRepoSchema = new mongoose.Schema<IGroupedRepo>({
     name: {type: String,required: true},
-    type: {type: String,required: true},
+    // type: {type: String,required: true},
     devDependencies: {type: Object},
     dependencies:{type: Object},
     pkg_type: {type: String,required: true},

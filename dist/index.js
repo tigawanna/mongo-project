@@ -35,7 +35,9 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     //   // Do something with the collection here...
     // })
     //   // app.use(express.static(__dirname + '/public'));
-    mongoose_1.default.connect('mongodb://127.0.0.1:27017/green').then(() => __awaiter(void 0, void 0, void 0, function* () {
+    const PROD_MONGODB_URI = `mongodb+srv://denniskinuthiaw:${process.env.ATLAS_PWD}@frankfurt-cluster.htmeu8w.mongodb.net/?retryWrites=true&w=majority`;
+    const LOCAL_MONGODB_URI = `mongodb://localhost:27017/green`;
+    mongoose_1.default.connect(PROD_MONGODB_URI).then(() => __awaiter(void 0, void 0, void 0, function* () {
         (0, helpers_1.logSuccess)('MongoDb Connected!');
         // const aggr_repos = await GroupedRepo.findById('6441a9c829c381bc7473bf0d')
         // logSuccess("by Id  ", aggr_repos);
