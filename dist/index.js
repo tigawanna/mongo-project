@@ -25,22 +25,10 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
     const port = process.env.PORT ? process.env.PORT : PORT;
     app.use(express_1.default.json());
-    // const MONGODB_URI = 'mongodb://localhost:27017/green';
-    // mongoose.connect(MONGODB_URI);
-    // const db = mongoose.connection;
-    // db.on('error', console.error.bind(console, 'MongoDB connection error: '));
-    // db.once('open', () => {
-    //   logSuccess('MongoDB connection successful!');
-    //   const groupedCollection = db.collection('grouped');
-    //   // Do something with the collection here...
-    // })
-    //   // app.use(express.static(__dirname + '/public'));
     const PROD_MONGODB_URI = `mongodb+srv://denniskinuthiaw:${process.env.ATLAS_PWD}@frankfurt-cluster.htmeu8w.mongodb.net/?retryWrites=true&w=majority`;
     const LOCAL_MONGODB_URI = `mongodb://localhost:27017/green`;
     mongoose_1.default.connect(PROD_MONGODB_URI).then(() => __awaiter(void 0, void 0, void 0, function* () {
         (0, helpers_1.logSuccess)('MongoDb Connected!');
-        // const aggr_repos = await GroupedRepo.findById('6441a9c829c381bc7473bf0d')
-        // logSuccess("by Id  ", aggr_repos);
     }));
     app.set("view engine", "ejs");
     app.use(express_1.default.static("public"));
@@ -50,7 +38,7 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     app.use("/github", github_1.default);
     app.use("/about", about_1.default);
     app.listen(port, () => {
-        console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
+        (0, helpers_1.logSuccess)(`⚡️[server]: Server is running at http://localhost:${PORT}`);
     });
 });
-startServer().catch(e => console.log("error strting server======== ", e));
+startServer().catch(e => (0, helpers_1.logError)("error starting server======== ", e));
