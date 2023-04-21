@@ -1,9 +1,8 @@
 import express from "express";
-import { getOneRepoPackageJson, getViewerRepos } from "./helpers";
-import { DecodedPackageJson } from "./type";
-import { logError, logNormal, logSuccess } from "../../utils/helpers";
+import { computeAllPkgJsons } from "./helpers";
+import { logError,logSuccess } from "../../utils/helpers";
 import { getGroupedRepos } from "../../mongo/queries";
-import { GroupedRepo } from "../../mongo/schema";
+import { batchCreateRepos, batchUpdateRepos, updateRepo } from "../../mongo/mutations";
 
 
 
@@ -13,17 +12,7 @@ const router = express.Router();
 
 
 router.get("/", async (req, res) => {
-  // const all_repos  = await getViewerRepos(req.body?.viewer_token)
   try{
-    // const aggr_repos = await getGroupedRepos()
-  // const aggr_repos = await GroupedRepo.create({
-  //  dependencies: {"nice":"nice"},
-  //  devDependencies: {"nice":"nice"},
-  //  favdeps:["nice"],
-  //  name:"test",
-  //  pkg_type:"test",
-  //  type:"test",
-   // })
   const aggr_repos = await getGroupedRepos()
     logSuccess("AGGR repos ",aggr_repos);
     res.json(aggr_repos);
@@ -35,47 +24,61 @@ router.get("/", async (req, res) => {
 
 });
 
-router.get("/group", async (req, res) => {
-  // const all_repos  = await getViewerRepos(req.body?.viewer_token)
-  // logSuccess("github endpoint");
-  
-  res.json({ boobs: "YES" });
+router.put("/group", async (req, res) => {
+  if (!req.body?.ownwer_repo_name){
+    res.status(400).send(new Error("repo_name is required"))
+    return
+  }
+
+  try {
+    const repo = req.body.owner_repo_name
+    const repo_pkg_json = await updateRepo(repo)
+    logSuccess("repo_pkg_json update",repo_pkg_json);
+    res.json(repo_pkg_json);
+  } catch (error) {
+    logError("error in the update_repo catch block  ==> ", error)
+  }
+
 });
 
 
 
-router.post("/", async (req, res) => {
-  // console.log("requeets.body    === ",chalk.green(req.body))
-
+router.post("/batch_create", async (req, res) => {
   try {
     if (!req?.body?.viewer_token) {
       res.status(400).send(new Error("viewer_token is required"))
       return
     }
-    const all_repos = await getViewerRepos(req.body?.viewer_token)
+    
+    const reposPkgJson = await computeAllPkgJsons(req.body.viewer_token)
+    const repo_insert_res = await batchCreateRepos(reposPkgJson)
+    res.json({ "batch repo insertion ":repo_insert_res});
+  }
+  catch (error) {
+    logError("error in the batch_create catch block  ==> ", error)
+    res.status(400).send({ error })
+  }
 
-    if (all_repos && "message" in all_repos) {
-      logError("error loading  viewer repos  ==> ", all_repos)
-      res.status(400).send(new Error(all_repos.message))
+  logError("viewer repos not found");
+  res.status(400).send(new Error("viewer repositories not found"))
+
+});
+
+
+
+router.put("/batch_update", async (req, res) => {
+  try {
+    if (!req?.body?.viewer_token) {
+      res.status(400).send(new Error("viewer_token is required"))
       return
     }
 
-    const reposPkgJson: DecodedPackageJson[] = [];
-
-    if (all_repos && "data" in all_repos) {
-      const reposList = all_repos.data.viewer.repositories.nodes
-      for await (const repo of reposList) {
-        const pkgjson = await getOneRepoPackageJson(repo.nameWithOwner);
-        if (pkgjson) {
-          reposPkgJson.push(pkgjson);
-        }
-      }
-    }
-    logNormal("repo pkg jsns", reposPkgJson)
-    res.json({ reposPkgJson });
+    const reposPkgJson = await computeAllPkgJsons(req.body.viewer_token)
+    const repo_insert_res = await batchUpdateRepos(reposPkgJson)
+    res.json({ "batch repo update ": repo_insert_res });
   }
   catch (error) {
-    logError("error loading  viewer repos in main catch block  ==> ", error)
+    logError("error in the batch_update catch block  ==> ", error)
     res.status(400).send({ error })
   }
 
@@ -87,36 +90,9 @@ router.post("/", async (req, res) => {
 
 
 
-
 export default router;
 
 
 
 
-// [
-//   {
-//     "$group": {
-//       "_id": "$pkg_type",
-//       "repo_names": { "$push": "$name" },
-//       "top_favdeps": { "$push": "$favdeps" }
-//     }
-//   },
-//   {
-//     "$unwind": "$top_favdeps"
-//   },
-//   {
-//     $sort: {
-//       "top_favdeps": -1
-//     }
-//   },
-//   {
-//     "$unwind": "$top_favdeps"
-//   },
-//   {
-//     "$group": {
-//       "_id": "$_id",
-//       "repo_names": { "$first": "$repo_names" },
-//       "top_favdeps": { "$addToSet": "$top_favdeps" }
-//     }
-//   }
-// ]
+

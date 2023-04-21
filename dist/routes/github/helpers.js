@@ -8,8 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOneRepoPackageJson = exports.modifyPackageJson = exports.mostFaveDepsList = exports.createPkgObject = exports.pkgTypeCondition = exports.getViewerRepos = void 0;
+exports.computeAllPkgJsons = exports.getOneRepoPackageJson = exports.modifyPackageJson = exports.mostFaveDepsList = exports.createPkgObject = exports.pkgTypeCondition = exports.getViewerRepos = void 0;
+const helpers_1 = require("../../utils/helpers");
 const type_1 = require("./type");
 function getViewerRepos(viewer_token) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -148,3 +156,47 @@ function getOneRepoPackageJson(owner_repo) {
     });
 }
 exports.getOneRepoPackageJson = getOneRepoPackageJson;
+function computeAllPkgJsons(viewer_token) {
+    var _a, e_1, _b, _c;
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const all_repos = yield getViewerRepos(viewer_token);
+            if (all_repos && "message" in all_repos) {
+                (0, helpers_1.logError)("error loading  viewer repos  ==> ", all_repos);
+                throw new Error("error loading  viewer repos : " + all_repos.message);
+            }
+            const reposPkgJson = [];
+            if (all_repos && "data" in all_repos) {
+                const reposList = all_repos.data.viewer.repositories.nodes;
+                try {
+                    for (var _d = true, reposList_1 = __asyncValues(reposList), reposList_1_1; reposList_1_1 = yield reposList_1.next(), _a = reposList_1_1.done, !_a;) {
+                        _c = reposList_1_1.value;
+                        _d = false;
+                        try {
+                            const repo = _c;
+                            const pkgjson = yield getOneRepoPackageJson(repo.nameWithOwner);
+                            if (pkgjson) {
+                                reposPkgJson.push(pkgjson);
+                            }
+                        }
+                        finally {
+                            _d = true;
+                        }
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (!_d && !_a && (_b = reposList_1.return)) yield _b.call(reposList_1);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
+            }
+            return reposPkgJson;
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+exports.computeAllPkgJsons = computeAllPkgJsons;

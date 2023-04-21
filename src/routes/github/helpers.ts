@@ -1,3 +1,4 @@
+import { logError } from "../../utils/helpers"
 import { BadDataGitHubError, DecodedPackageJson, RequiredDecodedPackageJson, TPkgType, ViewerRepos, pkgTypesArr } from "./type"
 
 export async function getViewerRepos(viewer_token: string) {
@@ -154,3 +155,32 @@ export async function getOneRepoPackageJson(owner_repo: string) {
 
 }
 
+
+
+export async function computeAllPkgJsons(viewer_token:string){
+try{
+    const all_repos = await getViewerRepos(viewer_token)
+
+    if (all_repos && "message" in all_repos) {
+        logError("error loading  viewer repos  ==> ", all_repos)
+        throw new Error("error loading  viewer repos : " + all_repos.message)
+    }
+
+    const reposPkgJson: DecodedPackageJson[] = [];
+
+    if (all_repos && "data" in all_repos) {
+        const reposList = all_repos.data.viewer.repositories.nodes
+        for await (const repo of reposList) {
+            const pkgjson = await getOneRepoPackageJson(repo.nameWithOwner);
+            if (pkgjson) {
+                reposPkgJson.push(pkgjson);
+            }
+        }
+    }
+    return reposPkgJson
+}
+catch(err){
+    throw err
+}
+
+}
