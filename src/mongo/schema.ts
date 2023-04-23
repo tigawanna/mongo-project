@@ -19,4 +19,6 @@ const GroupedRepoSchema = new mongoose.Schema<IGroupedRepo>({
     favdeps: {type:[String]}
 }, { collection: 'grouped' });
 
-export const GroupedRepo = mongoose.model("grouped", GroupedRepoSchema);
+export const GroupedRepo = mongoose.model("grouped", GroupedRepoSchema)
+
+

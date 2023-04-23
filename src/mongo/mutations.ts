@@ -12,9 +12,9 @@ try {
 }
 }
 
-export async function updateRepo(owner_repo:string) {
+export async function updateRepo(owner_repo:string,viewer_token:string) {
   try {
-        const repo_pkg_json = await getOneRepoPackageJson(owner_repo)
+        const repo_pkg_json = await getOneRepoPackageJson(owner_repo,viewer_token)
         if(repo_pkg_json && "message" in repo_pkg_json){
             throw new Error(repo_pkg_json.message)
         }

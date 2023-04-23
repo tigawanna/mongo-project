@@ -1,5 +1,33 @@
 import { logError } from "../../utils/helpers"
-import { BadDataGitHubError, DecodedPackageJson, RequiredDecodedPackageJson, TPkgType, ViewerRepos, pkgTypesArr } from "./type"
+import { BadDataGitHubError, DecodedPackageJson, IGithubViewer, RequiredDecodedPackageJson, TPkgType, ViewerRepos, pkgTypesArr } from "./type"
+
+export async function getGithubViewer(viewer_token:string){
+    try {
+        const headersList = {
+            "Accept": "*/*",
+            "User-Agent": "Thunder Client (https://www.thunderclient.com)",
+            "Authorization": `Bearer ${viewer_token}`,
+            "Content-Type": "application/json"
+        }
+
+        const response = await fetch("https://api.github.com/user", {
+            method: "GET",
+            headers: headersList
+        });
+    if(response.ok){
+        const data = await response.json() as unknown as IGithubViewer
+        return data
+    }
+    throw await response.json()
+
+    } catch (error) {
+        logError("error in the getGithubViewer catch block  ==> ", error)
+        throw error
+    }
+}
+
+
+
 
 export async function getViewerRepos(viewer_token: string) {
     // console.log("viewerr token  === ", viewer_token)
@@ -126,10 +154,10 @@ export async function modifyPackageJson(pgkjson: DecodedPackageJson) {
 }
 
 //  get repository package.json
-export async function getOneRepoPackageJson(owner_repo: string) {
+export async function getOneRepoPackageJson(owner_repo: string, viewer_token: string) {
     try {
         const headersList = {
-            "Authorization": `bearer ${process.env.GH_PAT}`,
+            "Authorization": `bearer ${viewer_token}`,
         }
         const response = await fetch(`https://api.github.com/repos/${owner_repo}/contents/package.json`, {
             method: "GET",
@@ -171,7 +199,7 @@ try{
     if (all_repos && "data" in all_repos) {
         const reposList = all_repos.data.viewer.repositories.nodes
         for await (const repo of reposList) {
-            const pkgjson = await getOneRepoPackageJson(repo.nameWithOwner);
+            const pkgjson = await getOneRepoPackageJson(repo.nameWithOwner, viewer_token);
             if (pkgjson) {
                 reposPkgJson.push(pkgjson);
             }

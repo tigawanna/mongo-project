@@ -24,10 +24,10 @@ function batchCreateRepos(repos) {
     });
 }
 exports.batchCreateRepos = batchCreateRepos;
-function updateRepo(owner_repo) {
+function updateRepo(owner_repo, viewer_token) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const repo_pkg_json = yield (0, helpers_1.getOneRepoPackageJson)(owner_repo);
+            const repo_pkg_json = yield (0, helpers_1.getOneRepoPackageJson)(owner_repo, viewer_token);
             if (repo_pkg_json && "message" in repo_pkg_json) {
                 throw new Error(repo_pkg_json.message);
             }

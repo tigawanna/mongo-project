@@ -20,7 +20,19 @@ const mutations_1 = require("../../mongo/mutations");
 // var clc = require("cli-color");
 const router = express_1.default.Router();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+        res.send('PAT Bearer token  required for this action: ' + token);
+        return;
+    }
     try {
+        const user = yield (0, helpers_1.getGithubViewer)(token);
+        if (user.email !== "denniskinuthiaw@gmail.com") {
+            (0, helpers_2.logError)("user is not him ==> ", user);
+            res.send({ "user is not him ": user });
+            return;
+        }
         const aggr_repos = yield (0, queries_1.getGroupedRepos)();
         (0, helpers_2.logSuccess)("AGGR repos ", aggr_repos);
         res.json(aggr_repos);
@@ -30,30 +42,35 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(400).send({ error: err });
     }
 }));
-router.put("/group", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    if (!((_a = req.body) === null || _a === void 0 ? void 0 : _a.ownwer_repo_name)) {
-        res.status(400).send(new Error("repo_name is required"));
-        return;
-    }
-    try {
-        const repo = req.body.owner_repo_name;
-        const repo_pkg_json = yield (0, mutations_1.updateRepo)(repo);
-        (0, helpers_2.logSuccess)("repo_pkg_json update", repo_pkg_json);
-        res.json(repo_pkg_json);
-    }
-    catch (error) {
-        (0, helpers_2.logError)("error in the update_repo catch block  ==> ", error);
-    }
-}));
+// router.put("/group", async (req, res) => {
+//   if (!req.body?.ownwer_repo_name){
+//     res.status(400).send(new Error("repo_name is required"))
+//     return
+//   }
+//   const authHeader = req.headers['authorization'];
+//   const token = authHeader && authHeader.split(' ')[1];
+//   if (!token) {
+//     res.send('PAT required for this action: ' + token);
+//     return
+//   }
+//   try {
+//     const repo = req.body.owner_repo_name
+//     const repo_pkg_json = await updateRepo(repo,token)
+//     logSuccess("repo_pkg_json update",repo_pkg_json);
+//     res.json(repo_pkg_json);
+//   } catch (error) {
+//     logError("error in the update_repo catch block  ==> ", error)
+//   }
+// });
 router.post("/batch_create", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
     try {
-        if (!((_b = req === null || req === void 0 ? void 0 : req.body) === null || _b === void 0 ? void 0 : _b.viewer_token)) {
-            res.status(400).send(new Error("viewer_token is required"));
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+        if (!token) {
+            res.send('PAT Bearer token required for this action: ' + token);
             return;
         }
-        const reposPkgJson = yield (0, helpers_1.computeAllPkgJsons)(req.body.viewer_token);
+        const reposPkgJson = yield (0, helpers_1.computeAllPkgJsons)(token);
         const parsedRepos = reposPkgJson.filter((repo) => (repo && ("name" in repo) && repo.name && repo.pkg_type));
         const repo_insert_res = yield (0, mutations_1.batchCreateRepos)(parsedRepos);
         (0, helpers_2.logSuccess)("repo_insert_res gotten=== ", repo_insert_res);
@@ -68,13 +85,14 @@ router.post("/batch_create", (req, res) => __awaiter(void 0, void 0, void 0, fun
     // res.status(400).send(new Error("viewer repositories not found"))
 }));
 router.put("/batch_update", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c;
     try {
-        if (!((_c = req === null || req === void 0 ? void 0 : req.body) === null || _c === void 0 ? void 0 : _c.viewer_token)) {
-            res.status(400).send(new Error("viewer_token is required"));
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+        if (!token) {
+            res.send('PAT Bearer token required for this action: ' + token);
             return;
         }
-        const reposPkgJson = yield (0, helpers_1.computeAllPkgJsons)(req.body.viewer_token);
+        const reposPkgJson = yield (0, helpers_1.computeAllPkgJsons)(token);
         const parsedRepos = reposPkgJson.filter((repo) => (repo && ("name" in repo) && repo.name && repo.pkg_type));
         const repo_insert_res = yield (0, mutations_1.batchUpdateRepos)(parsedRepos);
         res.json({ "batch repo update ": repo_insert_res });

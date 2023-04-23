@@ -16,9 +16,35 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.computeAllPkgJsons = exports.getOneRepoPackageJson = exports.modifyPackageJson = exports.mostFaveDepsList = exports.createPkgObject = exports.pkgTypeCondition = exports.getViewerRepos = void 0;
+exports.computeAllPkgJsons = exports.getOneRepoPackageJson = exports.modifyPackageJson = exports.mostFaveDepsList = exports.createPkgObject = exports.pkgTypeCondition = exports.getViewerRepos = exports.getGithubViewer = void 0;
 const helpers_1 = require("../../utils/helpers");
 const type_1 = require("./type");
+function getGithubViewer(viewer_token) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const headersList = {
+                "Accept": "*/*",
+                "User-Agent": "Thunder Client (https://www.thunderclient.com)",
+                "Authorization": `Bearer ${viewer_token}`,
+                "Content-Type": "application/json"
+            };
+            const response = yield fetch("https://api.github.com/user", {
+                method: "GET",
+                headers: headersList
+            });
+            if (response.ok) {
+                const data = yield response.json();
+                return data;
+            }
+            throw yield response.json();
+        }
+        catch (error) {
+            (0, helpers_1.logError)("error in the getGithubViewer catch block  ==> ", error);
+            throw error;
+        }
+    });
+}
+exports.getGithubViewer = getGithubViewer;
 function getViewerRepos(viewer_token) {
     return __awaiter(this, void 0, void 0, function* () {
         // console.log("viewerr token  === ", viewer_token)
@@ -130,11 +156,11 @@ function modifyPackageJson(pgkjson) {
 }
 exports.modifyPackageJson = modifyPackageJson;
 //  get repository package.json
-function getOneRepoPackageJson(owner_repo) {
+function getOneRepoPackageJson(owner_repo, viewer_token) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const headersList = {
-                "Authorization": `bearer ${process.env.GH_PAT}`,
+                "Authorization": `bearer ${viewer_token}`,
             };
             const response = yield fetch(`https://api.github.com/repos/${owner_repo}/contents/package.json`, {
                 method: "GET",
@@ -174,7 +200,7 @@ function computeAllPkgJsons(viewer_token) {
                         _d = false;
                         try {
                             const repo = _c;
-                            const pkgjson = yield getOneRepoPackageJson(repo.nameWithOwner);
+                            const pkgjson = yield getOneRepoPackageJson(repo.nameWithOwner, viewer_token);
                             if (pkgjson) {
                                 reposPkgJson.push(pkgjson);
                             }
